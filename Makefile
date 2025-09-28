@@ -13,7 +13,7 @@ CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb
 CFLAGS += -MD
 CFLAGS += -mcmodel=medany
 CFLAGS += -ffreestanding -fno-common -nostdlib
-CFLAGS += -I. -Iinclude# 允许 #include "uart.h" 这样的写法
+CFLAGS += -I. # 允许 #include "uart.h" 这样的写法
 
 # 4. 设置链接器参数
 LDFLAGS = -z max-page-size=4096
@@ -24,8 +24,6 @@ OBJS = \
 	kernel/boot/start.o \
 	kernel/main.o \
 	kernel/uart.o \
-	kernel/printf.o \
-	kernel/console.o \
 
 # 6. 定义最终目标：内核文件 kernel
 #    它依赖于所有的 .o 文件和一个链接器脚本
@@ -46,7 +44,11 @@ kernel.elf: $(OBJS) $(LDSCRIPT)
 
 # 9. 定义 `clean` 规则，用于删除所有生成的文件，保持目录干净
 clean:
-	rm -f *.o kernel.elf *.asm *.sym *.d
+	# 使用 find 命令递归删除所有 .o 和 .d 文件
+	find . -name "*.o" -delete
+	find . -name "*.d" -delete
+	# 删除根目录下的其他生成文件
+	rm -f kernel.elf kernel.asm kernel.sym
 
 # 10. 定义运行 QEMU 的规则
 QEMU = qemu-system-riscv64
